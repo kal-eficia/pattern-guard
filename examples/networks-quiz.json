@@ -1,0 +1,24 @@
+{
+  "title": "Networks starter",
+  "questions": [
+    {"q": "Which device joins two parts of a LAN that use the same protocol?", "options": ["Bridge", "Router", "Modem", "Hub"], "answer": "Bridge"},
+    {"q": "What does a MAC address identify?", "options": ["A network interface", "A website", "A user account", "A file type"], "answer": 0},
+    {"q": "Which of these is a wireless standard?", "options": ["Wi-Fi", "HTML", "USB", "SQL"], "answer": 0},
+    {"q": "What does SSID stand for?", "options": ["Service Set Identifier", "Secure System ID", "Simple Signal ID", "Server Socket ID"], "answer": 0},
+    {"q": "Which protocol sends web pages securely?", "options": ["FTP", "HTTPS", "SMTP", "POP3"], "answer": 1},
+    {"q": "An intranet is…", "options": ["Open to anyone online", "A type of cable", "Private to one organisation", "A search engine"], "answer": 2},
+    {"q": "Which device converts digital to analogue signals?", "options": ["Switch", "Bridge", "Hub", "Modem"], "answer": 3},
+    {
+      "type": "sort",
+      "prompt": "Sort each device into input or output.",
+      "items": [
+        {"text": "Keyboard", "bucket": "Input"},
+        {"text": "Mouse", "bucket": "Input"},
+        {"text": "Microphone", "bucket": "Input"},
+        {"text": "Monitor", "bucket": "Output"},
+        {"text": "Speaker", "bucket": "Output"},
+        {"text": "Printer", "bucket": "Output"}
+      ]
+    }
+  ]
+}
