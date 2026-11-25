@@ -90,7 +90,8 @@ plan_key(10, 4, seed=1)   # e.g. [1, 3, 0, 3, 2, 0, 1, 2, 0, 3]
 
 1. Plan a key first: a balanced bag of positions, placed one at a time with backtracking so no step creates a run, staircase, alternation or repeating block.
 2. Move each correct option to its planned slot and shuffle the distractors around it. Question wording is never touched.
-3. Check the result again. The tests run hundreds of seeds to prove planned keys come out clean and balanced.
+3. Options that must stay put ("All of the above", "None of these", "A and B") keep their position. If one of them is the correct answer, that question's slot is fixed and the rest of the key is planned around it.
+4. Check the result again. The tests run hundreds of seeds to prove planned keys come out clean and balanced.
 
 ## Run the tests
 

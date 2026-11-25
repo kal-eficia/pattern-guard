@@ -17,7 +17,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from .core import LETTERS, Report, analyse, plan_key, reorder_options
+from .core import LETTERS, Report, _bad_extension, analyse, plan_key, reorder_options
 
 
 def load(path: str | Path) -> tuple[Any, list[dict]]:
@@ -73,20 +73,101 @@ def check_sort(task: dict, strict: bool = False) -> Report:
     return rep
 
 
+PINNED_RE = re.compile(
+    r"^\s*(all|none|both|neither)\b.*\b(above|these|them|of the options)\b|^\s*(all|none) of (the above|these|them)\s*$"
+    r"|^\s*both [a-d] and [a-d]\s*$|^\s*[a-d] and [a-d]( only)?\s*$",
+    re.IGNORECASE,
+)
+
+
+def pinned_slots(options: list) -> set[int]:
+    """Positions that must not move: "All of the above", "None of these", "A and B" and similar."""
+    return {i for i, o in enumerate(options) if isinstance(o, str) and PINNED_RE.search(o)}
+
+
+def _plan_constrained(allowed: list[list[int]], width: int, seed: int | None, strict: bool,
+                      attempts: int = 400) -> list[int]:
+    """Pattern-free key where position i may only take values in allowed[i]."""
+    rng = random.Random(seed)
+    best = None
+    for _ in range(attempts):
+        key: list[int] = []
+        counts = [0] * width
+        budget = [5000]
+
+        def place(i: int) -> bool:
+            if i == len(allowed):
+                return True
+            budget[0] -= 1
+            if budget[0] <= 0:
+                return False
+            choices = allowed[i][:]
+            rng.shuffle(choices)
+            choices.sort(key=lambda v: counts[v])  # keep the spread even
+            for v in choices:
+                key.append(v)
+                counts[v] += 1
+                if not _bad_extension(key, strict) and place(i + 1):
+                    return True
+                key.pop()
+                counts[v] -= 1
+            return False
+
+        if place(0):
+            rep = analyse(key, width, strict)
+            if rep.clean:
+                return key
+            if rep.ok and best is None:
+                best = key[:]
+    if best is None:
+        raise RuntimeError("could not find a pattern-free key with these fixed options; reword one")
+    return best
+
+
 def fix_mcq(questions: list[dict], seed: int | None = None, strict: bool = True) -> list[dict]:
+    """Reorder options so the key has no pattern. Options such as "All of the above"
+    keep their position; if one of them is the answer, that question's position is fixed."""
     out = copy.deepcopy(questions)
     mcqs = [q for q in out if "options" in q]
     if not mcqs:
         return out
     rng = random.Random(seed)
-    sizes = {len(q["options"]) for q in mcqs}
-    width = min(sizes)  # every target must exist in every question
-    target_key = plan_key(len(mcqs), width, seed=seed, strict=strict)
+    width = min(len(q["options"]) for q in mcqs)  # every target must exist in every question
+    allowed = []
+    for q in mcqs:
+        idx = answer_index(q)
+        pins = pinned_slots(q["options"])
+        if idx in pins:
+            allowed.append([idx])
+        else:
+            free = [i for i in range(width) if i not in pins]
+            allowed.append(free or [idx])
+    target_key = _plan_constrained(allowed, width, seed, strict)
     for q, target in zip(mcqs, target_key):
         idx = answer_index(q)
         as_text = not isinstance(q["answer"], int)
-        q["options"], new = reorder_options(q["options"], idx, target, rng)
-        q["answer"] = q["options"][new] if as_text else new
+        opts = q["options"]
+        pins = pinned_slots(opts)
+        if idx in pins:
+            free = [i for i in range(len(opts)) if i not in pins]
+            movers = [opts[i] for i in free]
+            rng.shuffle(movers)
+            new_opts = opts[:]
+            for slot, o in zip(free, movers):
+                new_opts[slot] = o
+            new = idx
+        else:
+            correct = opts[idx]
+            free = [i for i in range(len(opts)) if i not in pins]
+            others = [opts[i] for i in free if i != idx]
+            rng.shuffle(others)
+            new_opts = opts[:]
+            it = iter(others)
+            for slot in free:
+                new_opts[slot] = correct if slot == target else next(it)
+            new = target
+        q["options"] = new_opts
+        q["answer"] = new_opts[new] if as_text else new
     return out
 
 
