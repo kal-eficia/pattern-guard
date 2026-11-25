@@ -7,7 +7,7 @@ name = "pattern-guard"
 version = "1.0.0"
 description = "Catch guessable answer patterns (runs, staircases, alternation, cycles) in multiple-choice and sort tasks, and fix them."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Kalid Nur" }]
 keywords = ["education", "quiz", "assessment", "multiple-choice", "teachers", "edtech"]
