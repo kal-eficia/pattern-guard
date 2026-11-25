@@ -1,6 +1,7 @@
 <p align="center"><img src=".github/banner.png" alt="pattern-guard" width="100%"></p>
 
 <p align="center">
+  <a href="https://github.com/kal-eficia/pattern-guard/actions/workflows/tests.yml"><img src="https://github.com/kal-eficia/pattern-guard/actions/workflows/tests.yml/badge.svg" alt="tests"></a>
   <img src="https://img.shields.io/badge/python-3.9%2B-0c1a30?style=flat-square" alt="Python 3.9+">
   <img src="https://img.shields.io/badge/dependencies-none-0f8b8d?style=flat-square" alt="No dependencies">
   <img src="https://img.shields.io/badge/licence-MIT-c99a2e?style=flat-square" alt="MIT">
